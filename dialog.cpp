@@ -46,19 +46,41 @@ void Dialog::switchToPage4()
 {
     ui->stackedWidget->setCurrentIndex(3);
 }
+void Dialog::switchToPage5()
+{
+    ui->stackedWidget->setCurrentIndex(4);
+}
+void Dialog::switchToPage6()
+{
+    ui->stackedWidget->setCurrentIndex(5);
+}
 //ajout
 void Dialog::on_buttonBox_accepted()
 {
     QString ID_COMMANDE = ui->lineEdit->text();
-    QString DATE_COMMANDE = ui->dateEdit->date().toString();
-    QString DATE_LIVRAISON = ui->dateEdit_2->date().toString();
+    QDate DATE_COMMANDE = ui->dateEdit->date();
+    QDate DATE_LIVRAISON = ui->dateEdit_2->date();
     QString STATUT_COMMANDE = ui->lineEdit_2->text();
     QString PRIX = ui->lineEdit_3->text();
-    QDate DATE_COMMANDEE = ui->dateEdit->date();
-    QDate DATE_LIVRAISONN = ui->dateEdit_2->date();
+    QString id = ui->comboBox_2->currentText();
+    QString num;
+    QString nom;
+    QSqlQuery query;
+    query.prepare("SELECT num_c, nom_c FROM clients WHERE id_c = :id");
+        query.bindValue(":id", id);
+        if (query.exec()) {
+            if (query.next()) {
+                num = query.value(0).toString();
+                nom = query.value(1).toString();
+                qDebug() << "Numéro:" << num << "Nom:" << nom;
+            }
+        } else {
+            qDebug() << "Erreur lors de l'exécution de la requête:" << query.lastError().text();
+        }    qDebug() << "num : !"<<num;
+
     QDate dateActuelle = QDate::currentDate();
     Commande C(ID_COMMANDE,DATE_COMMANDE,DATE_LIVRAISON,STATUT_COMMANDE,PRIX);
-    if (ID_COMMANDE=="" || DATE_COMMANDE=="" || DATE_LIVRAISON=="" || STATUT_COMMANDE=="" || PRIX=="" ) {
+    if (ID_COMMANDE=="" || STATUT_COMMANDE=="" || PRIX=="" ) {
 
         QMessageBox::warning(this, "Champs manquants", "Veuillez remplir tous les champs");
     } else {
@@ -66,16 +88,16 @@ void Dialog::on_buttonBox_accepted()
         {
             QMessageBox::warning(this, "Erreur", "Veuillez introduire un Prix >= 0 ");
         }
-        else if(DATE_COMMANDEE < dateActuelle || DATE_LIVRAISONN < dateActuelle) {
+        else if(DATE_COMMANDE < dateActuelle || DATE_LIVRAISON < dateActuelle) {
                    QMessageBox::warning(this, "Erreur", "Veuillez saisir une date valide");
         }
         else{
-
+    sendsms(num,nom);
     C.Ajouter();
     accept();
         }
-    }
-}
+}}
+
 //supprision
 void Dialog::on_buttonBox_2_accepted()
 {
@@ -96,15 +118,13 @@ void Dialog::affichage()
 void Dialog::on_buttonBox_3_accepted()
 {
     QString ID_COMMANDE = ui->lineEdit_5->text();
-    QString DATE_COMMANDE = ui->dateEdit_3->date().toString();
-    QString DATE_LIVRAISON = ui->dateEdit_4->date().toString();
+    QDate DATE_COMMANDE = ui->dateEdit_3->date();
+    QDate DATE_LIVRAISON = ui->dateEdit_4->date();
     QString STATUT_COMMANDE = ui->lineEdit_6->text();
     QString PRIX = ui->lineEdit_7->text();
-    QDate DATE_COMMANDEE = ui->dateEdit_3->date();
-    QDate DATE_LIVRAISONN = ui->dateEdit_4->date();
     QDate dateActuelle = QDate::currentDate();
     Commande C(ID_COMMANDE,DATE_COMMANDE,DATE_LIVRAISON,STATUT_COMMANDE,PRIX);
-    if (ID_COMMANDE=="" || DATE_COMMANDE=="" || DATE_LIVRAISON=="" || STATUT_COMMANDE=="" || PRIX=="" ) {
+    if (ID_COMMANDE=="" || STATUT_COMMANDE=="" || PRIX=="" ) {
 
         QMessageBox::warning(this, "Champs manquants", "Veuillez remplir tous les champs");
     } else {
@@ -112,7 +132,7 @@ void Dialog::on_buttonBox_3_accepted()
         {
             QMessageBox::warning(this, "Erreur", "Veuillez introduire un Prix >= 0 ");
         }
-        else if(DATE_COMMANDEE < dateActuelle || DATE_LIVRAISONN < dateActuelle) {
+        else if(DATE_COMMANDE < dateActuelle || DATE_LIVRAISON < dateActuelle) {
                    QMessageBox::warning(this, "Erreur", "Veuillez saisir une date valide");
         }
         else{
@@ -121,28 +141,6 @@ void Dialog::on_buttonBox_3_accepted()
     accept();
         }
     }
-}
-
-
-//les buttons annuler
-void Dialog::on_buttonBox_rejected()
-{
-    reject();
-}
-
-void Dialog::on_buttonBox_2_rejected()
-{
-    reject();
-}
-void Dialog::on_pushButton_clicked()
-{
-    accept();
-}
-
-
-void Dialog::on_buttonBox_3_rejected()
-{
-    reject();
 }
 void Dialog::afficherStatistiques() {
     QSqlQuery query;
@@ -248,6 +246,27 @@ void Dialog::sendsms(QString num, QString nom)
             reply->deleteLater();
         });
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //les buttons annuler
 void Dialog::on_buttonBox_rejected()

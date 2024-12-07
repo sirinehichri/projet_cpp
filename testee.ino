@@ -21,6 +21,7 @@ void setup() {
 }
 
 void loop() {
+  Serial.println(String(dht.readTemperature()));
   if (Serial.available() > 0) {
     char input = Serial.read();
     Serial.println(input); // Echo input for debugging
@@ -39,6 +40,7 @@ void loop() {
   if (keepTurning) {
     moveServoNonBlocking();
   }
+  delay(1000);
 }
 
 void moveServoNonBlocking() {

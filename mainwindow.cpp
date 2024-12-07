@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    test = 0;
     ui->setupUi(this);
     int ret=A.connect_arduino(); // lancer la connexion à arduino
         switch(ret){
@@ -160,6 +161,7 @@ void MainWindow::on_pushButton_11_clicked()
 }
 
 void MainWindow::on_pushButton_14_clicked()
+
 {
     Dialog dialog(this); // Create a dialog with MainWindow as the parent
     dialog.switchToPage6();
@@ -167,77 +169,31 @@ void MainWindow::on_pushButton_14_clicked()
     dialog.exec();
 }
 
-/*void MainWindow::update_label(){
+void MainWindow::update_label(){
 
-QByteArray data1 = A.read_from_arduino();
-data= data+data1;
-qDebug()<< data;
-// Find the index of the second line
-    int start = data.indexOf("\r\n") + 2;  // Move past the first \r\n
-    int end = data.indexOf("\r\n", start);
-
-    QByteArray value = data.mid(start, end - start).trimmed();
-    qDebug() << "Extracted value:" << value;
-
-QMessageBox::information(this, "Temperateur trés élevée\n Temperateur : " , "temperateur est :" +value);
-}
-
-
-void MainWindow::on_pushButton_12_clicked()
-{
-    A.write_to_arduino("1");
-    data="";
-    return;
-}*/
-
-
-
-
-void MainWindow::update_label()
-{
-    static QByteArray data;       // Accumulation des données reçues
-    static double lastTemperature = -9999.0;  // Pour suivre les changements de température
-
-    // Envoyer la commande pour lire la température
-    A.write_to_arduino("1");
-
-    // Lire les nouvelles données de l'Arduino
     QByteArray data1 = A.read_from_arduino();
-    data += data1;  // Ajouter les nouvelles données reçues
-    qDebug() << "Données reçues :" << data;
+    data= data+data1;
+    // qDebug()<< data;
+    // Find the index of the second line
+        int start = data.indexOf("\r\n") + 2;  // Move past the first \r\n
+        int end = data.indexOf("\r\n", start);
 
-    // Cherche une valeur complète (délimitée par \r\n)
-    int start = data.indexOf("\r\n") + 2;
-    int end = data.indexOf("\r\n", start);
-
-    if (start > 1 && end > start) {
         QByteArray value = data.mid(start, end - start).trimmed();
-        qDebug() << "Valeur extraite :" << value;
-
-        data.remove(0, end + 2);  // Supprime les données déjà traitées
-
-        // Convertir la valeur en température
-        bool ok;
-        double temperature = value.toDouble(&ok);
-
-        if (ok) {
-            qDebug() << "Température actuelle :" << temperature << "°C";
-
-
-
-            // Vérifie si la température a changé par rapport à la précédente
-            if (temperature != lastTemperature) {
-                lastTemperature = temperature;
-
-                // Déclencher une alerte si la température dépasse un seuil élevé
-                if (temperature > 30.0) {  // Exemple de seuil d'alerte : 30°C
-                    QMessageBox::warning(this, "Alerte Température",
-                                         "Température très élevée : " + QString::number(temperature) + "°C");
-                }
-            }
-        } else {
-            qDebug() << "Erreur : impossible de convertir la valeur en température.";
+        //qDebug() << "Extracted value:" << value;
+        ui->label_temperateur->setText(value);
+        if (value.toInt()>25 && test == 0)
+        {
+            QMessageBox::information(this, "Temperateur trés élevée\n Temperateur : " , "temperateur est :" +value);
+            test = 1;
         }
+        else test = 0;
+
+
     }
-}
+
+
+    void MainWindow::on_pushButton_12_clicked()
+    {
+
+    }
 
